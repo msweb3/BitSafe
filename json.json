@@ -1,0 +1,10 @@
+{
+  "currency": "btc",
+  "callback": {
+    "method": "POST",
+    "url": "http://example.com/callback",
+    "data": {
+      "id": "1"
+    }
+  }
+}
