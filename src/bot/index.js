@@ -26,24 +26,26 @@ const bot_init = (db) => {
   });
 
   bot.hears("👤 Profile", async (ctx) => {
-    profile(ctx);
+    await profile(ctx);
   });
 
-  bot.action("deposit-btn", async (ctx) => {
-    deposit(ctx);
-  });
+  // bot.action("deposit-btn", async (ctx) => {});
 
   bot.action(async (cb, ctx) => {
+    if (cb.includes("deposit-btn")) {
+      await deposit(ctx);
+    }
+
     if (cb.includes("-deposit-payment-btn")) {
-      get_payment(ctx);
+      await get_payment(ctx);
     }
 
     if (cb.includes("deposit-history-btn")) {
-      deposit_history(bot, ctx);
+      await deposit_history(bot, ctx);
     }
 
     if (cb.includes("set-pincode-btn")) {
-      set_pin(ctx);
+      await set_pin(ctx);
     }
   });
 

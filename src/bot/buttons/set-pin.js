@@ -7,8 +7,8 @@ module.exports = async (ctx) => {
   });
 
   if (!user.pin || user.pin.length != 6) {
-    ctx.scene.enter("SET_PIN");
-  } else {
-    ctx.replyWithHTML("Something wen't wrong");
+    return ctx.scene.enter("SET_PIN");
   }
+
+  ctx.replyWithHTML("Something wen't wrong");
 };

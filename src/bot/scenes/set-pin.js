@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const { Telegraf, Scenes } = require("telegraf");
+const { Scenes } = require("telegraf");
 const { BaseScene } = Scenes;
 const { UltimateTextToImage } = require("ultimate-text-to-image");
 const path = require("path");
@@ -9,7 +9,7 @@ const User = require("../../../model/User");
 
 const setPin = new BaseScene("SET_PIN");
 
-setPin.enter((ctx) => {
+setPin.enter(async (ctx) => {
   ctx.replyWithHTML(
     `🔐 <b>Set a New PIN</b>\n\nTo enhance the security of your account, you can set a personal identification number (PIN). This PIN will be required for certain sensitive actions, such as withdrawals.\n\nPlease enter a new 6-digit PIN for your account. Ensure it is something easy for you to remember but not easily guessable by others.\n\nReply with the 6-digit PIN you'd like to set.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nYour security is our priority! 🔒💼`,
     {
