@@ -29,25 +29,15 @@ const bot_init = (db) => {
     await profile(ctx);
   });
 
-  // bot.action("deposit-btn", async (ctx) => {});
+  bot.action(/deposit-btn/, deposit);
 
-  bot.action(async (cb, ctx) => {
-    if (cb.includes("deposit-btn")) {
-      await deposit(ctx);
-    }
+  bot.action(/deposit-payment-btn$/, get_payment);
 
-    if (cb.includes("-deposit-payment-btn")) {
-      await get_payment(ctx);
-    }
-
-    if (cb.includes("deposit-history-btn")) {
-      await deposit_history(bot, ctx);
-    }
-
-    if (cb.includes("set-pincode-btn")) {
-      await set_pin(ctx);
-    }
+  bot.action(/deposit-history-btn$/, async (ctx) => {
+    await deposit_history(bot, ctx);
   });
+
+  bot.action(/set-pincode-btn$/, set_pin);
 
   // Enable graceful stop
   process.once("SIGINT", () => bot.stop("SIGINT"));
