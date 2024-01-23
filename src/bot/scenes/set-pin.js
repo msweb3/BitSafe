@@ -77,7 +77,7 @@ setPin.on("message", async (ctx) => {
     return ctx.scene.leave();
   } else {
     ctx.replyWithHTML(
-      `⚠️ <b>Incorrect PIN</b>\n\nOops! The PIN you entered is incorrect. Please make sure to enter the correct 6-digit PIN associated with your account.\n\nIf you continue to experience issues or have forgotten your PIN, use the /help command or contact our support team for assistance.\n\nYour security is important to us! 🔒💼`,
+      `⚠️ <b>Invalid PIN</b>\n\nOops! The PIN you entered is not a valid. Please make sure to enter the valid 6-digit PIN.\n\nIf you continue to experience issues or have forgotten your PIN, use the /help command or contact our support team for assistance.\n\nYour security is important to us! 🔒💼`,
       {
         reply_markup: {
           inline_keyboard: [
