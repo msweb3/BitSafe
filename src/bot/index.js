@@ -21,10 +21,10 @@ const config = require("../../config");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const stage = new Stage(Object.values(require("./scenes/index")));
-const stageWizards = new Scenes.Stage([withdrawWizard]);
-
 const bot_init = (db) => {
+  const stageWizards = new Scenes.Stage([withdrawWizard]);
+  const stage = new Stage(Object.values(require("./scenes/index")));
+
   bot.use(session(db));
   bot.use(stage.middleware());
   bot.use(stageWizards.middleware());

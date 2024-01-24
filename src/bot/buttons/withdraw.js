@@ -13,6 +13,7 @@ module.exports = async (ctx) => {
 
   if (totalBalance > 0) {
     ctx.answerCbQuery();
+    ctx.deleteMessage(ctx.update.callback_query.message.message_id);
     return ctx.scene.enter("WITHDRAW");
   } else {
     ctx.replyWithHTML(
