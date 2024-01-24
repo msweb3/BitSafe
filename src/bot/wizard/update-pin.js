@@ -1,27 +1,14 @@
 const axios = require("axios");
 
-const { Scenes } = require("telegraf");
-const { BaseScene } = Scenes;
+const { Telegraf, Composer, Scenes } = require("telegraf");
 const { UltimateTextToImage } = require("ultimate-text-to-image");
 const path = require("path");
 
 const User = require("../../../model/User");
 
-const setPin = new BaseScene("UPDATE_PIN");
+const onUpdatePIN = new Composer();
 
-setPin.enter(async (ctx) => {
-  ctx.replyWithHTML(
-    `🔐 <b>Update a PIN</b>\n\nTo enhance the security of your account, you can update a personal identification number (PIN). This PIN will be required for certain sensitive actions, such as withdrawals.\n\nPlease enter a previous 6-digit PIN for your account.\n\nReply with the 6-digit PIN you'd set before.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nYour security is our priority! 🔒💼`,
-    {
-      reply_markup: {
-        inline_keyboard: [[{ text: "🚫 Cancel", callback_data: "cancel-pin" }]],
-      },
-    }
-  );
-  ctx.session.isValid = true;
-});
-
-setPin.on("message", async (ctx) => {
+onUpdatePIN.on("message", async (ctx) => {
   function validatePIN(pin) {
     // Define a regular expression for a 6-digit PIN
     const pinRegex = /^\d{6}$/;
@@ -126,7 +113,7 @@ setPin.on("message", async (ctx) => {
   }
 });
 
-setPin.action(/cancel-pin/, async (ctx) => {
+onUpdatePIN.action(/cancel-pin/, async (ctx) => {
   ctx.answerCbQuery();
   ctx.deleteMessage(ctx.update.callback_query.message.message_id);
   ctx.replyWithHTML(
@@ -135,8 +122,18 @@ setPin.action(/cancel-pin/, async (ctx) => {
   ctx.scene.leave();
 });
 
-// setPin.use(async (ctx) => {
-//   return;
-// });
+const updatePin = new Scenes.WizardScene("UPDATE_PIN", onUpdatePIN);
 
-module.exports = setPin;
+updatePin.enter(async (ctx) => {
+  ctx.replyWithHTML(
+    `🔐 <b>Update a PIN</b>\n\nTo enhance the security of your account, you can update a personal identification number (PIN). This PIN will be required for certain sensitive actions, such as withdrawals.\n\nPlease enter a previous 6-digit PIN for your account.\n\nReply with the 6-digit PIN you'd set before.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nYour security is our priority! 🔒💼`,
+    {
+      reply_markup: {
+        inline_keyboard: [[{ text: "🚫 Cancel", callback_data: "cancel-pin" }]],
+      },
+    }
+  );
+  ctx.session.isValid = true;
+});
+
+module.exports = updatePin;

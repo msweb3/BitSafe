@@ -270,8 +270,8 @@ withdrawalConfirmation.action(/confirm-transaction/, async (ctx) => {
       new Transaction({
         owner_id: user._id,
         owner_chatId: user.telegramId,
-        currency: ctx.session.__scenes.state.selectedAsset,
-        value: ctx.session.__scenes.state.withdrawalAmount,
+        currency: ctx.session.__scenes.state.selectedAsset.toLowerCase(),
+        value: parseFloat(ctx.session.__scenes.state.withdrawalAmount) / 1e-8,
         input_address: ctx.session.__scenes.state.withdrawalAddress,
         input_transaction_hash: response.data.id,
         type: "out",

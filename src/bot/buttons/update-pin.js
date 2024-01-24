@@ -5,6 +5,8 @@ module.exports = async (ctx) => {
     telegramId: ctx.update.callback_query.from.id,
   });
 
+  ctx.deleteMessage(ctx.update.callback_query.message.message_id);
+
   if (user.pin || user.pin.length === 6) {
     ctx.answerCbQuery();
     return ctx.scene.enter("UPDATE_PIN");
