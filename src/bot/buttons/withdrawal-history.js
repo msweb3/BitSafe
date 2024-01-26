@@ -56,7 +56,6 @@ module.exports = async (bot, ctx) => {
       lastPage: "Last page", // optional. Default value: "❗️ That's the last page"
       prev: "◀️", // optional. Default value: "⬅️"
       next: "▶️", // optional. Default value: "➡️"
-      delete: "🗑", // optional. Default value: "❌"
     },
   });
 

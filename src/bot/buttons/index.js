@@ -6,4 +6,11 @@ module.exports = {
   update_pin: require("./update-pin"),
   withdraw: require("./withdraw"),
   withdrawal_history: require("./withdrawal-history"),
+  accept_deal: require("./accept-deal"),
+  reject_deal: require("./reject-deal"),
+  make_payment: require("./make-payment"),
+  confirm_payment: require("./confirm-payment"),
+  reject_payment: require("./reject-payment"),
+  refund_payment: require("./refund-payment"),
+  release_payment: require("./release-payment"),
 };

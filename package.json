@@ -19,6 +19,7 @@
     "telegraf": "^4.15.3",
     "telegraf-pagination": "^1.4.1",
     "telegraf-session-mongodb": "^2.0.2",
-    "ultimate-text-to-image": "^1.0.1"
+    "ultimate-text-to-image": "^1.0.1",
+    "uniqid": "^5.4.0"
   }
 }
