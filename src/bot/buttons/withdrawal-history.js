@@ -10,6 +10,7 @@ module.exports = async (bot, ctx) => {
   });
 
   if (transactions.length === 0) {
+    ctx.answerCbQuery();
     return ctx.replyWithHTML("You don't have any transaction yet.");
   }
 

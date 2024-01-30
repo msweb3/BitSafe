@@ -148,6 +148,28 @@ module.exports = async (bot, ctx) => {
               }
         );
       }
+
+      if (item.dealStatus.status === "DISPUTED") {
+        ctx.replyWithHTML(
+          `⚖️ <b>Disputed Deal Details</b>\n\nWe acknowledge that the deal between you and your counterpart has been disputed. Here are the details of the disputed deal:\n\n<b>Deal ID:</b> <code>${
+            item.dealId
+          }</code>\n<b>Seller ID:</b> <code>${
+            item.sellerId
+          }</code>\n<b>Buyer ID:</b> <code>${
+            item.buyerId
+          }</code>\n<b>Payment Method:</b> <code>${
+            item.dealPaymentMethod.fullName
+          }</code>\n<b>Amount:</b> <code>${
+            item.dealAmountCoin
+          } ${item.dealPaymentMethod.symbol.toUpperCase()} ~ ${
+            item.dealAmountUsd
+          } USD</code>\n<b>Terms and Conditions:</b> <code>${
+            item.dealTerms
+          }</code>\n\nIf you have any additional information or concerns, please reply to this message or contact our support team at [<a href="https://t.me/${
+            process.env.SUPPORT_USERNAME
+          }">Support Contact</a>].\n\nWe appreciate your cooperation as we work to resolve this matter.\n\nHappy dealing! 🌐💼`
+        );
+      }
     }, // optional. Default value: empty function
     messages: {
       // optional

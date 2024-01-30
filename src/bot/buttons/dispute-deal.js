@@ -3,7 +3,7 @@ const { Markup } = require("telegraf");
 const Deal = require("../../../model/Deal");
 
 module.exports = async (ctx) => {
-  const dealId = ctx.update.callback_query.data.replace("release-payment-", "");
+  const dealId = ctx.update.callback_query.data.replace("dispute-deal-", "");
 
   const deal = await Deal.findOne({
     dealId: dealId,
@@ -21,14 +21,14 @@ module.exports = async (ctx) => {
     Markup.inlineKeyboard([
       [
         {
-          text: "✅ Yes, release the funds",
-          callback_data: `confirm-releasingFunds-${deal.dealId}`,
+          text: "✅ Yes, dispute the deal",
+          callback_data: `confirm-disputeDeal-${deal.dealId}`,
         },
       ],
       [
         {
-          text: "🚫 No, don't release funds",
-          callback_data: `reject-releasingFunds-${deal.dealId}`,
+          text: "🚫 No, don't dispute the deal",
+          callback_data: `reject-disputeDeal-${deal.dealId}`,
         },
       ],
     ]).reply_markup

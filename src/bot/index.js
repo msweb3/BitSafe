@@ -2,7 +2,7 @@ const axios = require("axios");
 const { Telegraf, Scenes, Markup } = require("telegraf");
 const { session } = require("telegraf-session-mongodb");
 
-const { start } = require("./commands/index");
+const { start, solve_dispute } = require("./commands/index");
 const { profile, initiate_deal, active_deals } = require("./keyboards/index");
 const {
   deposit,
@@ -19,6 +19,15 @@ const {
   reject_payment,
   refund_payment,
   release_payment,
+  confirm_release,
+  reject_release,
+  confirm_refund,
+  reject_refund,
+  dispute_deal,
+  confirm_dispute,
+  reject_dispute,
+  solve_seller,
+  solve_buyer,
 } = require("./buttons/index");
 
 const {
@@ -85,59 +94,31 @@ const bot_init = (db) => {
 
   bot.action(/reject-makingPayment-.*/, reject_payment);
 
-  bot.action(/refund-payment-.*/, async (ctx) => {
-    console.log(ctx);
+  bot.action(/refund-payment-.*/, refund_payment);
+
+  bot.action(/confirm-refundingFunds-.*/, confirm_refund);
+
+  bot.action(/reject-refundingFunds-.*/, reject_refund);
+
+  bot.action(/release-payment-.*/, release_payment);
+
+  bot.action(/confirm-releasingFunds-.*/, confirm_release);
+
+  bot.action(/reject-releasingFunds-.*/, reject_release);
+
+  bot.action(/dispute-deal-.*/, dispute_deal);
+
+  bot.action(/confirm-disputeDeal-.*/, confirm_dispute);
+
+  bot.action(/reject-disputeDeal-.*/, reject_dispute);
+
+  bot.command("solve", async (ctx) => {
+    solve_dispute(ctx);
   });
 
-  bot.action(/release-payment.*/, async (ctx) => {
-    const dealId = ctx.update.callback_query.data.replace(
-      "release-payment-",
-      ""
-    );
+  bot.action(/solve-toSeller-.*/, solve_seller);
 
-    const deal = await Deal.findOne({
-      dealId: dealId,
-      "dealStatus.isPaid": true,
-      "dealStatus.isAccepted": true,
-      "dealStatus.status": "PAID",
-    });
-
-    if (!deal) {
-      ctx.answerCbQuery();
-      return ctx.deleteMessage(ctx.update.callback_query.message.message_id);
-    }
-
-    const seller = await User.findOne({ telegramId: deal.sellerId });
-
-    const sellerAssets = seller.cryptos.find((sellerAsset) => {
-      return (
-        sellerAsset.symbol.toLowerCase() ===
-        deal.dealPaymentMethod.symbol.toLowerCase()
-      );
-    });
-
-    sellerAssets.balance =
-      parseFloat(sellerAssets.balance).toFixed(8) + parseFloat();
-
-    deal.dealStatus.status = "COMPLETED";
-
-    await ctx.telegram.sendMessage(
-      deal.buyerId,
-      `💸 <b>Funds Released</b>\n\nCongratulations! You've successfully released the funds to the seller. The deal is now marked as completed.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nHappy dealing! 🌐💼`,
-      { parse_mode: "HTML" }
-    );
-
-    await ctx.telegram.sendMessage(
-      deal.sellerId,
-      `💸 <b>Funds Received</b>\n\nGreat news! The buyer has released the funds to your balance. The deal is now marked as completed.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nHappy dealing! 🌐💼`,
-      { parse_mode: "HTML" }
-    );
-
-    await seller.save();
-    await deal.save();
-    await ctx.answerCbQuery();
-    await ctx.deleteMessage(ctx.update.callback_query.message.message_id);
-  });
+  bot.action(/solve-toBuyer-.*/, solve_buyer);
 
   // Enable graceful stop
   process.once("SIGINT", () => bot.stop("SIGINT"));

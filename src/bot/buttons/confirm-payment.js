@@ -39,8 +39,9 @@ module.exports = async (ctx) => {
     );
   }
 
-  dealAsset.balance =
-    parseFloat(dealAsset.balance) - parseFloat(deal.dealAmountCoin);
+  dealAsset.balance = (
+    parseFloat(dealAsset.balance) - parseFloat(deal.dealAmountCoin)
+  ).toFixed(8);
   deal.dealStatus.isPaid = true;
   deal.dealStatus.status = "PAID";
   buyer.save();
@@ -51,7 +52,7 @@ module.exports = async (ctx) => {
   dealParticipants.forEach((participantId) => {
     ctx.telegram.sendMessage(
       participantId,
-      `💳 <b>Payment Successful</b>\n\nCongratulations! The buyer has successfully made the payment for the deal. Here are the details:\n\n<b>Seller ID:</b> <code>${deal.sellerId}</code>\n<b>Buyer ID:</b> <code>${deal.buyerId}</code>\n<b>Payment Method:</b> <code>${deal.dealPaymentMethod.fullName}</code>\n<b>Amount:</b> <code>${deal.dealAmountCoin} ${deal.dealPaymentMethod.symbol} ~ ${deal.dealAmountUsd} USD</code>\n<b>Terms and Conditions:</b> ${deal.dealTerms}\n\n<b>Deal Balance</b>: <code>${deal.dealAmountCoin} ${deal.dealPaymentMethod.symbol} ~ ${deal.dealAmountUsd} USD</code> — <b>✅ PAID</b>\n\n<b>Next Steps:</b>\n- <b>Seller:</b> Please provide the agreed-upon goods or services to the buyer.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nHappy dealing! 🌐💼`,
+      `💳 <b>Payment Successful</b>\n\nCongratulations! The buyer has successfully made the payment for the deal. Here are the details:\n\n<b>Seller ID:</b> <code>${deal.sellerId}</code>\n<b>Buyer ID:</b> <code>${deal.buyerId}</code>\n<b>Payment Method:</b> <code>${deal.dealPaymentMethod.fullName}</code>\n<b>Amount:</b> <code>${deal.dealAmountCoin} ${deal.dealPaymentMethod.symbol} ~ ${deal.dealAmountUsd} USD</code>\n<b>Terms and Conditions:</b> <code>${deal.dealTerms}</code>\n\n<b>Deal Balance</b>: <code>${deal.dealAmountCoin} ${deal.dealPaymentMethod.symbol} ~ ${deal.dealAmountUsd} USD</code> — <b>✅ PAID</b>\n\n<b>Next Steps:</b>\n- <b>Seller:</b> Please provide the agreed-upon goods or services to the buyer.\n\nIf you have any questions or need assistance, use the /help command or contact our support team.\n\nHappy dealing! 🌐💼`,
       participantId === deal.sellerId
         ? {
             parse_mode: "HTML",
