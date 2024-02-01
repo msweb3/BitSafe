@@ -72,7 +72,12 @@ withdrawalAmount.on("message", async (ctx) => {
 
   const assetAmount = parseFloat(ctx.message.text) / exchangeRates.data.usd;
 
-  if (userAsset.balance < assetAmount.toFixed(8)) {
+  console.log(assetAmount.toFixed(8));
+
+  if (
+    parseFloat(Number(userAsset.balance).toFixed(8)) <
+    parseFloat(assetAmount.toFixed(8))
+  ) {
     return ctx.replyWithHTML(
       `⚠️ <b>Insufficient Funds</b>\n\nOops! The withdrawal amount you entered exceeds your available funds.\n\n💼 <b>Available ${
         userAsset.name
@@ -81,6 +86,12 @@ withdrawalAmount.on("message", async (ctx) => {
       ).toFixed(
         2
       )} USD</b>\n\nPlease review your available funds and re-enter a withdrawal amount that doesn't exceed your balance.`
+    );
+  }
+
+  if (parseFloat(Number(assetAmount).toFixed(8)) <= parseFloat("0.000025")) {
+    return ctx.replyWithHTML(
+      `⚠️ <b>Invalid Withdrawal Amount</b>\n\nOops! It seems you've entered an invalid withdrawal amount.`
     );
   }
 
@@ -133,13 +144,21 @@ verificationPin.on("message", async (ctx) => {
       params: {
         currency: ctx.session.__scenes.state.selectedAsset.toLowerCase(),
         destinations: `${ctx.session.__scenes.state.withdrawalAddress}:${
-          parseFloat(ctx.session.__scenes.state.withdrawalAmount).toFixed(8) /
-          1e-8
+          parseFloat(ctx.session.__scenes.state.withdrawalAmount) / 1e-8
         }`,
         fee: "normal",
         "subtract-fee-from-amount": true,
       },
     });
+
+    // increase service fee and decrease receiving amount
+
+    const serviceFee = parseInt(process.env.SERVICE_FEE);
+    const serviceFeeUnits =
+      (serviceFee / 100) * estimatedTransaction.data.total;
+    const serviceFeeAmount = parseFloat(
+      (1e-8 * ((serviceFee / 100) * estimatedTransaction.data.total)).toFixed(8)
+    );
 
     const exchangeRates = await axios({
       method: "get",
@@ -153,30 +172,39 @@ verificationPin.on("message", async (ctx) => {
       destinationAddress: ctx.session.__scenes.state.withdrawalAddress,
       networkFee: {
         units: estimatedTransaction.data.fee.network.amount,
-        amount: estimatedTransaction.data.fee.network.amount * 1e-8,
+        amount: (estimatedTransaction.data.fee.network.amount * 1e-8).toFixed(
+          8
+        ),
         usd: (
           exchangeRates.data.usd *
           (estimatedTransaction.data.fee.network.amount * 1e-8)
         ).toFixed(2),
       },
       serviceFee: {
-        units: estimatedTransaction.data.fee.processing.amount,
-        amount: estimatedTransaction.data.fee.processing.amount * 1e-8,
+        units:
+          estimatedTransaction.data.fee.processing.amount + serviceFeeUnits,
+        amount: (
+          (estimatedTransaction.data.fee.processing.amount + serviceFeeUnits) *
+          1e-8
+        ).toFixed(8),
         usd: (
           exchangeRates.data.usd *
-          (estimatedTransaction.data.fee.processing.amount * 1e-8)
+          ((estimatedTransaction.data.fee.processing.amount + serviceFeeUnits) *
+            1e-8)
         ).toFixed(2),
       },
       receivingAmount: {
         units:
           estimatedTransaction.data.total -
           (estimatedTransaction.data.fee.network.amount +
-            estimatedTransaction.data.fee.processing.amount),
+            estimatedTransaction.data.fee.processing.amount +
+            serviceFeeUnits),
         amount: parseFloat(
           (
             estimatedTransaction.data.total * 1e-8 -
             (estimatedTransaction.data.fee.network.amount +
-              estimatedTransaction.data.fee.processing.amount) *
+              estimatedTransaction.data.fee.processing.amount +
+              serviceFeeUnits) *
               1e-8
           ).toFixed(8)
         ),
@@ -184,7 +212,8 @@ verificationPin.on("message", async (ctx) => {
           exchangeRates.data.usd *
           (estimatedTransaction.data.total * 1e-8 -
             (estimatedTransaction.data.fee.network.amount +
-              estimatedTransaction.data.fee.processing.amount) *
+              estimatedTransaction.data.fee.processing.amount +
+              serviceFeeUnits) *
               1e-8)
         ).toFixed(2),
       },
@@ -214,7 +243,6 @@ verificationPin.on("message", async (ctx) => {
 
     return ctx.wizard.next();
   } catch (error) {
-    console.log(error.response.data);
     if (
       error.response.data.message ===
       `Destination address ${ctx.message.text} is not valid.`
@@ -222,6 +250,13 @@ verificationPin.on("message", async (ctx) => {
       return ctx.replyWithHTML(
         `⚠️ <b>Invalid Destination Address</b>\n\nOops! It seems the destination address you entered is invalid. Please make sure to provide a correct and valid destination address for the withdrawal.`
       );
+    }
+
+    if (error) {
+      ctx.replyWithHTML(
+        `❌ <b>Withdrawal Process Failed</b>\n\nUnfortunately, the withdrawal process has failed and canceled due to the following reason:\n\n<b>Reason:</b> <code>${error.response.data.message}</code>\n\nIf you have any questions, need further clarification, or would like to retry the withdrawal, please use the /help command or contact our support team.\n\nWe apologize for any inconvenience caused.\n\nHappy dealing! 🌐💼`
+      );
+      return ctx.scene.leave();
     }
   }
 });
@@ -262,9 +297,17 @@ withdrawalConfirmation.action(/confirm-transaction/, async (ctx) => {
         return userAsset.symbol === response.data.currency.toUpperCase();
       });
 
-      userAsset.balance = parseFloat(
-        (userAsset.balance - response.data.total * 1e-8).toFixed(8)
+      // increase service fee and decrease receiving amount
+
+      const serviceFee = parseInt(process.env.SERVICE_FEE);
+      const serviceFeeUnits = (serviceFee / 100) * response.data.total;
+
+      let responseTotal = (response.data.total + serviceFeeUnits) * 1e-8;
+
+      userAsset.balance = parseFloat(userAsset.balance - responseTotal).toFixed(
+        8
       );
+
       user.save();
 
       new Transaction({
